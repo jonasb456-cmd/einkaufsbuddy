@@ -1,0 +1,115 @@
+<!-- EinkaufsBuddy: Wochenplan-Generator (Addon) -->
+<style>
+/* Neue Rezept- und Wochenplan-Oberfläche */
+.weekbuilder{background:linear-gradient(135deg,#0f5d38,#167447);color:#fff;border-radius:20px;padding:20px;margin:0 0 16px}
+.weekbuilder h2{margin:0 0 6px;font-size:22px}
+.weekbuilder p{color:#e0f3e7;margin:0 0 14px;font-size:13px}
+.wb-chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 15px}
+.wb-chip{border:1px solid #d8e7dc;background:#fff;color:#31513d;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700}
+.wb-chip input{accent-color:#167447;margin-right:5px}
+.wb-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.wb-controls label{display:block;font-size:11px;color:#dcefe3;margin-bottom:4px}
+.wb-controls select,.wb-controls input{width:100%;border:0;border-radius:10px;padding:10px;background:#fff;color:#1d2b24}
+.wb-generate{background:#f28c28;color:#2e1c0a;border:0;border-radius:12px;padding:12px 16px;font-weight:800;width:100%;margin-top:13px}
+.wb-days{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.wb-day{background:#fff;border:1px solid #e2e9e4;border-radius:16px;overflow:hidden}
+.wb-day-head{background:#fff5e9;padding:10px 13px;font-weight:800;display:flex;justify-content:space-between}
+.wb-day-body{padding:12px}
+.wb-meal-title{font-weight:800;margin-bottom:4px}
+.wb-meta{font-size:11px;color:#68776e;margin:5px 0 9px}
+.wb-tags{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0}
+.wb-tag{font-size:10px;background:#e8f5ed;color:#0f5d38;padding:4px 7px;border-radius:99px;font-weight:700}
+.wb-actions{display:flex;gap:6px;flex-wrap:wrap}
+.wb-actions button{border:0;border-radius:9px;padding:8px 9px;font-size:11px;font-weight:750;background:#e8f5ed;color:#0f5d38}
+.wb-actions button.primary{background:#167447;color:white}
+.wb-note{font-size:12px;color:#68776e;background:#f4f8f5;padding:11px;border-radius:11px;margin-top:12px}
+.wb-filter-note{font-size:12px;color:#fff0df;margin-top:8px}
+@media(max-width:650px){.wb-days{grid-template-columns:1fr}.wb-controls{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const categories=[
+["Fleisch","🍗"],["Vegetarisch","🥦"],["Vegan","🌱"],["Proteinreich","💪"],
+["Abnehmen","🥗"],["Muskelaufbau","🏋️"],["Günstig kochen","🪙"],["Schnelle Küche","⚡"],
+["Meal Prep","🥡"],["Airfryer","🍟"],["Resteverwertung","♻️"],["Glutenfrei","🌾"],
+["Laktosefrei","🥛"],["Frühstück","🍳"],["Snacks","🍎"],["Internationale Küche","🌍"]
+];
+const recipes=[
+{name:"Hähnchen-Reis-Bowl",tags:["Fleisch","Proteinreich","Muskelaufbau","Meal Prep","Abnehmen"],time:25,cost:2.4,kcal:520,protein:43,servings:2,meal:"Mittagessen",country:"International",ingredients:[["300","g","Hähnchenbrust"],["150","g","Reis"],["1","Stück","Paprika"],["150","g","Brokkoli"],["1","EL","Joghurt"]],steps:"Reis kochen. Hähnchen würzen und anbraten. Gemüse garen und alles mit Joghurtdip servieren."},
+{name:"Linsen-Kokos-Curry",tags:["Vegetarisch","Vegan","Günstig kochen","Meal Prep","Proteinreich","Glutenfrei","Laktosefrei"],time:30,cost:1.7,kcal:480,protein:22,servings:3,meal:"Abendessen",country:"Indisch",ingredients:[["200","g","rote Linsen"],["1","Dose","Kokosmilch"],["1","Stück","Zwiebel"],["200","g","Tomaten"],["150","g","Reis"]],steps:"Zwiebel anbraten. Linsen, Tomaten und Kokosmilch zugeben und köcheln lassen. Mit Reis servieren."},
+{name:"Magerquark-Power-Bowl",tags:["Vegetarisch","Proteinreich","Abnehmen","Muskelaufbau","Frühstück","Schnelle Küche","Günstig kochen"],time:5,cost:1.3,kcal:360,protein:38,servings:1,meal:"Frühstück",country:"Deutsch",ingredients:[["250","g","Magerquark"],["1","Stück","Banane"],["30","g","Haferflocken"],["10","g","Nüsse"]],steps:"Quark cremig rühren, Banane schneiden und mit Haferflocken und Nüssen darauf verteilen."},
+{name:"Airfryer-Kartoffeln mit Kräuterquark",tags:["Vegetarisch","Airfryer","Günstig kochen","Abnehmen","Glutenfrei"],time:25,cost:1.5,kcal:430,protein:24,servings:2,meal:"Abendessen",country:"Deutsch",ingredients:[["500","g","Kartoffeln"],["250","g","Magerquark"],["1","Bund","Kräuter"],["1","TL","Öl"]],steps:"Kartoffeln würfeln, mit wenig Öl würzen und im Airfryer bei 190 °C etwa 18–22 Minuten garen. Quark mit Kräutern verrühren."},
+{name:"Puten-Gemüse-Pfanne",tags:["Fleisch","Proteinreich","Abnehmen","Schnelle Küche","Meal Prep","Glutenfrei","Laktosefrei"],time:18,cost:2.6,kcal:390,protein:42,servings:2,meal:"Mittagessen",country:"Deutsch",ingredients:[["300","g","Putenbrust"],["300","g","Gemüsemix"],["100","g","Naturreis"],["1","EL","Sojasauce"]],steps:"Reis kochen. Pute anbraten, Gemüse dazugeben und bissfest garen. Mit Sojasauce abschmecken."},
+{name:"Kichererbsen-Wraps",tags:["Vegetarisch","Vegan","Günstig kochen","Schnelle Küche","Meal Prep"],time:15,cost:1.8,kcal:440,protein:17,servings:2,meal:"Mittagessen",country:"Orientalisch",ingredients:[["1","Dose","Kichererbsen"],["2","Stück","Wraps"],["1","Stück","Gurke"],["100","g","Salat"],["2","EL","Hummus"]],steps:"Kichererbsen abspülen und würzen. Gemüse schneiden, Wraps mit Hummus bestreichen und füllen."},
+{name:"Lachs mit Ofengemüse",tags:["Fleisch","Proteinreich","Abnehmen","Ofen"],time:30,cost:3.8,kcal:510,protein:36,servings:2,meal:"Abendessen",country:"Mediterran",ingredients:[["2","Stück","Lachsfilet"],["400","g","Gemüse"],["300","g","Kartoffeln"],["1","EL","Olivenöl"]],steps:"Gemüse und Kartoffeln würzen und im Ofen rösten. Lachs in den letzten 12–15 Minuten dazugeben."},
+{name:"Rührei-Gemüse-Toast",tags:["Vegetarisch","Proteinreich","Frühstück","Schnelle Küche","Günstig kochen"],time:10,cost:1.2,kcal:390,protein:25,servings:1,meal:"Frühstück",country:"Deutsch",ingredients:[["2","Stück","Eier"],["2","Scheiben","Vollkorntoast"],["1","Handvoll","Spinat"],["1","Stück","Tomate"]],steps:"Gemüse kurz anbraten, Eier dazugeben und stocken lassen. Mit Toast servieren."},
+{name:"Bohnen-Mais-Chili",tags:["Vegetarisch","Vegan","Günstig kochen","Meal Prep","Proteinreich","Glutenfrei","Laktosefrei"],time:25,cost:1.6,kcal:460,protein:21,servings:4,meal:"Abendessen",country:"Mexikanisch",ingredients:[["1","Dose","Kidneybohnen"],["1","Dose","Mais"],["1","Dose","Tomaten"],["1","Stück","Paprika"],["1","Stück","Zwiebel"]],steps:"Zwiebel und Paprika anbraten. Bohnen, Mais und Tomaten zugeben und 15 Minuten köcheln lassen."},
+{name:"Thunfisch-Pasta",tags:["Fisch","Proteinreich","Schnelle Küche","Günstig kochen"],time:15,cost:2.1,kcal:510,protein:34,servings:2,meal:"Mittagessen",country:"Italienisch",ingredients:[["200","g","Nudeln"],["1","Dose","Thunfisch"],["150","g","Tomaten"],["1","EL","Frischkäse"]],steps:"Nudeln kochen. Tomaten erwärmen, Thunfisch und Frischkäse einrühren und mit Nudeln mischen."},
+{name:"Ofen-Feta-Gemüse",tags:["Vegetarisch","Schnelle Küche","Ofen","Glutenfrei"],time:25,cost:2.2,kcal:470,protein:22,servings:2,meal:"Abendessen",country:"Mediterran",ingredients:[["200","g","Feta"],["1","Stück","Zucchini"],["1","Stück","Paprika"],["200","g","Tomaten"],["1","EL","Olivenöl"]],steps:"Gemüse schneiden, mit Feta und Öl in eine Form geben und bei 200 °C etwa 20–25 Minuten backen."},
+{name:"Apfel-Zimt-Overnight-Oats",tags:["Vegetarisch","Frühstück","Meal Prep","Günstig kochen"],time:5,cost:0.9,kcal:340,protein:15,servings:1,meal:"Frühstück",country:"International",ingredients:[["50","g","Haferflocken"],["150","ml","Milch"],["1","Stück","Apfel"],["100","g","Skyr"],["1","Prise","Zimt"]],steps:"Alles verrühren und über Nacht im Kühlschrank ziehen lassen."},
+{name:"Skyr-Beeren-Snack",tags:["Vegetarisch","Proteinreich","Snacks","Abnehmen","Schnelle Küche"],time:3,cost:1.1,kcal:190,protein:20,servings:1,meal:"Snack",country:"International",ingredients:[["150","g","Skyr"],["80","g","Beeren"],["1","TL","Honig"]],steps:"Skyr in eine Schale geben, Beeren und etwas Honig darauf verteilen."},
+{name:"Gemüse-Reis-Reste-Pfanne",tags:["Vegetarisch","Vegan","Resteverwertung","Günstig kochen","Schnelle Küche"],time:12,cost:0.8,kcal:390,protein:12,servings:2,meal:"Mittagessen",country:"Asiatisch",ingredients:[["250","g","gekochter Reis"],["200","g","Gemüsereste"],["2","EL","Sojasauce"],["1","Stück","Ei"]],steps:"Gemüsereste anbraten, Reis zugeben und heiß braten. Optional Ei unterrühren und mit Sojasauce würzen."},
+{name:"Hähnchen-Fajita-Blech",tags:["Fleisch","Proteinreich","Meal Prep","Internationale Küche"],time:28,cost:2.7,kcal:490,protein:40,servings:3,meal:"Abendessen",country:"Mexikanisch",ingredients:[["400","g","Hähnchenbrust"],["2","Stück","Paprika"],["1","Stück","Zwiebel"],["1","EL","Öl"],["3","Stück","Tortillas"]],steps:"Alles in Streifen schneiden, würzen und auf einem Blech bei 210 °C etwa 20 Minuten garen. Mit Tortillas servieren."}
+];
+const days=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+let chosen=new Map(),prefs={};
+function init(){
+ const section=$("week");if(!section)return;
+ const card=section.querySelector(".card");if(!card)return;
+ const box=document.createElement("div");box.id="weekBuilder";
+ box.innerHTML=`<div class="weekbuilder"><h2>🍽️ Deine Woche. Deine Auswahl.</h2><p>Wähle mehrere Wünsche – EinkaufsBuddy stellt dir passende Wochenvorschläge zusammen. Du kannst jedes Gericht austauschen.</p><b style="font-size:12px">Welche Kategorien möchtest du kombinieren?</b><div class="wb-chips" id="wbChips"></div><div class="wb-controls"><div><label>Wochenplan-Modus</label><select id="wbMode"><option value="mix">Meine Kategorien kombinieren</option><option value="goal">Nach meinem Ernährungsziel</option><option value="varied">Abwechslungsreiche Woche vorschlagen</option></select></div><div><label>Personen</label><select id="wbPeople"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div><div><label>Maximale Zubereitungszeit</label><select id="wbTime"><option value="999">Egal</option><option value="15">Bis 15 Minuten</option><option value="20">Bis 20 Minuten</option><option value="30">Bis 30 Minuten</option></select></div><div><label>Budget pro Portion</label><select id="wbCost"><option value="99">Egal</option><option value="1.5">Bis 1,50 €</option><option value="2">Bis 2,00 €</option><option value="3">Bis 3,00 €</option></select></div></div><div class="wb-controls" style="margin-top:10px"><div><label>Allergien / Unverträglichkeiten</label><input id="wbAllergies" placeholder="z. B. Milch, Gluten, Nüsse"></div><div><label>Was soll vermieden werden?</label><input id="wbAvoid" placeholder="z. B. Fisch, Pilze"></div></div><button class="wb-generate" id="wbGenerate">✨ Wochenplan vorschlagen</button><div class="wb-filter-note">Die Vorschläge sind editierbar. Allergene bitte zusätzlich anhand der Zutatenverpackung prüfen.</div></div><div id="wbResults"></div>`;
+ card.insertBefore(box,card.firstChild);
+ $("wbChips").innerHTML=categories.map(([c,emoji])=>`<label class="wb-chip"><input type="checkbox" value="${c}" ${["Fleisch","Vegetarisch","Proteinreich","Abnehmen","Günstig kochen","Schnelle Küche","Frühstück"].includes(c)?"checked":""}>${emoji} ${c}</label>`).join("");
+ $("wbGenerate").onclick=generate;
+}
+function generate(){
+ const tags=[...$("wbChips").querySelectorAll("input:checked")].map(x=>x.value);
+ const maxTime=Number($("wbTime").value),maxCost=Number($("wbCost").value),people=Number($("wbPeople").value);
+ const allergy=$("wbAllergies").value.toLowerCase().split(",").map(x=>x.trim()).filter(Boolean);
+ const avoid=$("wbAvoid").value.toLowerCase().split(",").map(x=>x.trim()).filter(Boolean);
+ const mode=$("wbMode").value;
+ let pool=recipes.filter(r=>r.time<=maxTime&&r.cost<=maxCost);
+ pool=pool.filter(r=>!allergy.concat(avoid).some(term=>term&&r.ingredients.some(i=>i[2].toLowerCase().includes(term))));
+ if(tags.length&&mode!=="varied")pool=pool.filter(r=>tags.some(t=>r.tags.includes(t)));
+ if(!pool.length){$("wbResults").innerHTML='<div class="notice">Mit diesen Filtern habe ich keine passenden Vorschläge gefunden. Bitte lockere Zeit, Budget oder Kategorien.</div>';return;}
+ // Eine ausgewogene Auswahl: möglichst unterschiedliche Mahlzeiten und nicht ständig dasselbe Gericht.
+ let available=[...pool],selected=[];
+ for(let i=0;i<7;i++){
+   let candidates=available.length?available:pool.filter(r=>!selected.some(s=>s.name===r.name));
+   if(!candidates.length)candidates=pool;
+   let preferred=candidates.filter(r=>i===0?r.meal==="Frühstück":i===6?r.meal!=="Snack":true);
+   if(preferred.length)candidates=preferred;
+   if(mode==="varied"&&i%3===1){let fresh=candidates.filter(r=>r.country!==selected[i-1]?.country);if(fresh.length)candidates=fresh;}
+   const pick=candidates[Math.floor(Math.random()*candidates.length)];
+   selected.push(pick);available=available.filter(r=>r.name!==pick.name);
+ }
+ chosen=new Map(selected.map((r,i)=>[i,r]));
+ renderDays(people);
+}
+function renderDays(people){
+ const selected=[...chosen.values()];
+ const total=selected.reduce((s,r)=>s+r.cost*people,0);
+ $("wbResults").innerHTML=`<div class="card" style="margin-top:14px"><div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><h2 style="margin:0">Dein Wochenvorschlag</h2><div class="small muted">7 Tage · ${people} ${people===1?"Person":"Personen"}</div></div><div class="pill">ca. ${total.toFixed(2).replace(".",",")} € Zutatenkosten*</div></div><div class="wb-days" style="margin-top:13px">${days.map((d,i)=>{const r=chosen.get(i);return `<article class="wb-day"><div class="wb-day-head"><span>${d}</span><span>${r.meal}</span></div><div class="wb-day-body"><div class="wb-meal-title">${r.name}</div><div class="wb-meta">⏱ ${r.time} Min. · ca. ${r.cost.toFixed(2).replace(".",",")} €/Portion · ${r.kcal} kcal · ${r.protein} g Protein</div><div class="wb-tags">${r.tags.slice(0,4).map(t=>`<span class="wb-tag">${t}</span>`).join("")}</div><div class="wb-actions"><button class="primary" onclick="window.EBWeek.add(${i})">Zutaten übernehmen</button><button onclick="window.EBWeek.swap(${i})">Austauschen</button><button onclick="window.EBWeek.details(${i})">Rezept</button></div></div></article>`}).join("")}</div><div class="wb-note">*Grobe Richtwerte pro Portion, keine Live-Supermarktpreise. Allergene können je nach Produkt variieren. Die Rezeptvorschläge sind eine Startauswahl und können später erweitert werden.</div><div class="wb-actions" style="margin-top:12px"><button class="primary" onclick="window.EBWeek.all()">Alle Zutaten auf Einkaufsliste</button><button onclick="window.EBWeek.regen()">Neue Woche vorschlagen</button></div></div>`;
+}
+window.EBWeek={
+ swap(i){const tags=[...$("wbChips").querySelectorAll("input:checked")].map(x=>x.value);const old=chosen.get(i);let pool=recipes.filter(r=>r.name!==old.name&&r.time<=Number($("wbTime").value)&&r.cost<=Number($("wbCost").value));const allergy=$("wbAllergies").value.toLowerCase().split(",").concat($("wbAvoid").value.toLowerCase().split(",")).map(x=>x.trim()).filter(Boolean);pool=pool.filter(r=>!allergy.some(t=>r.ingredients.some(a=>a[2].toLowerCase().includes(t))));if(tags.length&&$("wbMode").value!=="varied")pool=pool.filter(r=>tags.some(t=>r.tags.includes(t)));if(!pool.length){alert("Keine Alternative mit diesen Filtern gefunden.");return;}chosen.set(i,pool[Math.floor(Math.random()*pool.length)]);renderDays(Number($("wbPeople").value));},
+ details(i){const r=chosen.get(i);alert(r.name+"\\n\\nZutaten für "+r.servings+" Portionen:\\n"+r.ingredients.map(x=>x.join(" ")).join("\\n")+"\\n\\n"+r.steps+"\\n\\nNährwerte ca. je Portion: "+r.kcal+" kcal · "+r.protein+" g Protein.");},
+ add(i){addItems([chosen.get(i)]);},
+ all(){addItems([...chosen.values()]);},
+ regen(){generate();}
+};
+function addItems(list){
+ if(typeof state==="undefined"||!Array.isArray(state.items)){alert("Die Einkaufsliste konnte nicht geladen werden.");return;}
+ const people=Number($("wbPeople").value)||1;
+ list.forEach(r=>r.ingredients.forEach(a=>{
+  const qty=(Number(a[0])||1)*people/(r.servings||1),unit=a[1],name=a[2];
+  const old=state.items.find(x=>x.name.toLowerCase()===name.toLowerCase()&&x.unit===unit&&!x.done);
+  if(old)old.qty+=qty;else state.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name,qty,unit,cat:"Sonstiges",done:false});
+ }));
+ if(typeof save==="function")save();
+ alert("Zutaten wurden deiner Einkaufsliste hinzugefügt.");
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+</script>

@@ -1,0 +1,167 @@
+/* EinkaufsBuddy – Design 5: elegant & übersichtlich
+   Diese Datei wird zusätzlich zum bisherigen CSS geladen.
+*/
+:root{
+  --green:#145b32;
+  --green2:#0d4527;
+  --mint:#eaf3e9;
+  --orange:#f28b22;
+  --orange2:#fff0dc;
+  --ink:#17251d;
+  --muted:#718078;
+  --line:#e8ece8;
+  --paper:#fff;
+  --bg:#f5f6f2;
+  --red:#c94c42;
+  --shadow:0 5px 22px rgba(20,50,30,.07);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;line-height:1.45;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;transition:transform .15s ease,filter .15s ease}
+button:active{transform:scale(.98)}
+header{
+  background:linear-gradient(115deg,#0c4528 0%,#176638 65%,#1b7040 100%);
+  color:#fff;padding:14px max(16px,calc((100vw - 1120px)/2));
+  position:sticky;top:0;z-index:20;
+  box-shadow:0 5px 18px rgba(8,43,23,.18);
+}
+.headerrow{min-height:54px}
+.brand{gap:11px}
+.cart{
+  width:45px;height:45px;display:grid;place-items:center;
+  font-size:25px;padding:0;border-radius:14px;
+  background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.08));
+  border:1px solid rgba(255,255,255,.22);
+}
+.brand h1{font-size:21px;font-weight:800;letter-spacing:-.55px}
+.brand h1::first-letter{color:#fff}
+.brand small{font-size:11px;letter-spacing:.15px;color:#dceee2}
+.header-actions{gap:7px}
+.header-actions button{
+  border:1px solid rgba(255,255,255,.24);border-radius:12px;
+  background:rgba(255,255,255,.12);color:#fff;padding:9px 11px;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 18px 110px}
+.tabs{
+  display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+  padding:3px 0 17px;margin-bottom:3px;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  white-space:nowrap;background:#fff;border:1px solid #e7ece7;
+  border-radius:13px;padding:10px 14px;color:#637168;
+  font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(20,50,30,.035);
+}
+.tabs button.active{
+  color:#fff;background:var(--green);border-color:var(--green);
+  box-shadow:0 4px 12px rgba(20,91,50,.18);
+}
+.panel{display:none}
+.panel.active{display:block;animation:panelIn .22s ease}
+@keyframes panelIn{from{opacity:.65;transform:translateY(4px)}to{opacity:1;transform:none}}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.card{
+  background:#fff;border:1px solid #e9ede8;border-radius:20px;
+  padding:19px;box-shadow:var(--shadow);margin-bottom:16px;
+}
+.card h2{font-size:19px;letter-spacing:-.35px;font-weight:800;margin:0 0 14px}
+.card h3{font-size:16px;font-weight:750;margin:0 0 12px}
+.muted{color:var(--muted)}
+.field{gap:6px}
+.field label{font-size:11px;letter-spacing:.35px;text-transform:uppercase;color:#77847b;font-weight:800}
+.field input,.field select,.field textarea,input.basic,select.basic{
+  border:1px solid #e3e9e3;border-radius:12px;padding:12px 13px;
+  background:#fbfcfa;color:var(--ink);min-height:45px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus,input.basic:focus,select.basic:focus{
+  outline:none;border-color:#4c9666;box-shadow:0 0 0 3px rgba(37,121,67,.1);
+}
+.field textarea{min-height:90px}
+.primary,.orange,.soft,.danger{
+  border-radius:12px;padding:11px 15px;font-weight:750;
+}
+.primary{background:linear-gradient(135deg,#176638,#0e4b2b);color:#fff;box-shadow:0 4px 10px rgba(20,91,50,.15)}
+.orange{background:var(--orange);color:#2e1b08;box-shadow:0 4px 10px rgba(242,139,34,.17)}
+.soft{background:#edf5ed;color:#155b32;border:1px solid #e1ede2}
+.danger{background:#fff1ef;color:#b33d34}
+.small{font-size:12px}
+.list{gap:9px}
+.item{
+  border:1px solid #e9eee9;border-radius:14px;padding:12px 13px;
+  background:#fff;box-shadow:0 2px 8px rgba(20,50,30,.025);
+}
+.item.done{background:#f7faf7}
+.itemname{font-size:14px;font-weight:750}
+.itemmeta{font-size:11px;margin-top:2px}
+.check{accent-color:#176638;width:20px;height:20px}
+.pill{background:#fff0dc;color:#8a4b0b}
+.stats{gap:10px}
+.stat{
+  background:linear-gradient(145deg,#eff6ed,#e8f1e6);
+  border:1px solid #e2ece0;border-radius:15px;padding:13px;
+}
+.stat b{font-size:21px;color:#155b32;letter-spacing:-.5px}
+.stat span{font-size:10px;font-weight:700;letter-spacing:.15px}
+.progress{height:8px;background:#edf0eb}
+.progress i{background:linear-gradient(90deg,#176638,#f28b22)}
+.sectionhead{margin-bottom:14px}
+.sectionhead h2{font-size:19px;font-weight:800}
+.empty{padding:28px 12px;color:#849087}
+.day{
+  background:#fffaf3;border:1px solid #f5e8d6;border-left:4px solid var(--orange);
+  border-radius:0 14px 14px 0;padding:12px 13px;margin-bottom:9px;
+}
+.notice{background:#fff5e9;border:1px solid #f5dfc4;border-radius:13px;color:#79501e;padding:12px}
+.footer{font-size:11px;color:#89938c;padding-bottom:18px}
+video{object-fit:cover}
+@media(max-width:720px){
+  body{font-size:14px}
+  header{padding:10px 14px}
+  .brand h1{font-size:19px}
+  .brand small{font-size:10px}
+  .cart{width:41px;height:41px;font-size:23px}
+  .header-actions button{padding:8px 9px}
+  .wrap{padding:14px 12px 105px}
+  .grid{grid-template-columns:1fr;gap:0}
+  .card{padding:16px;border-radius:18px;margin-bottom:12px}
+  .card h2{font-size:18px}
+  .tabs{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    margin:0;padding:8px 7px calc(8px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.96);backdrop-filter:blur(16px);
+    border-top:1px solid #e8ece8;box-shadow:0 -5px 20px rgba(20,50,30,.08);
+    gap:3px;justify-content:space-around;
+  }
+  .tabs button{
+    flex:1;min-width:0;padding:8px 3px;border:0;border-radius:11px;
+    background:transparent;box-shadow:none;font-size:10px;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    white-space:normal;line-height:1.15;
+  }
+  .tabs button.active{background:#edf5ed;color:#145b32;box-shadow:none}
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .stat{padding:10px 8px}
+  .stat b{font-size:18px}
+  .stat span{font-size:9px}
+  .row{gap:7px}
+  .field input,.field select,.field textarea{padding:11px}
+  .actions{gap:6px}
+  .actions button{padding:9px 10px}
+}
+@media(min-width:721px){
+  .tabs{position:static}
+}
+@media print{
+  header,.tabs,.actions,button,.footer{display:none!important}
+  body{background:#fff}
+  .wrap{padding:0}
+  .card{box-shadow:none;border:0}
+}

@@ -1,0 +1,27 @@
+EINKAUFSBUDDY – DESIGN 5 (Elegant und übersichtlich)
+
+In diesem Paket sind:
+- einkaufsbuddy-design.css: neues Design passend zum ausgewählten Entwurf
+- EINBAU-ANLEITUNG.txt: einfache Anleitung für GitHub
+
+WICHTIG:
+Die vorhandene index.html und die bisherigen Funktionen bleiben bestehen.
+Die CSS-Datei ergänzt nur das Aussehen. Sie ersetzt keine Funktionen.
+
+EINBAU:
+1. Öffne dein GitHub-Repository einkaufsbuddy.
+2. Lade die Datei „einkaufsbuddy-design.css“ in den Hauptordner hoch (dort, wo index.html liegt).
+3. Öffne danach „index.html“ auf GitHub und tippe auf den Stift zum Bearbeiten.
+4. Suche im oberen Bereich nach dem Ende des großen style-Abschnitts: </style>
+5. Füge DIREKT DARUNTER diese Zeile ein:
+   <link rel="stylesheet" href="einkaufsbuddy-design.css">
+6. Speichere die Änderung mit „Commit changes“.
+7. Öffne deine EinkaufsBuddy-Seite in Safari und lade sie neu.
+
+Wenn du die Seite schon auf dem iPhone als App zum Home-Bildschirm hinzugefügt hast:
+Schließe die App ganz und öffne sie erneut. Falls noch das alte Design erscheint,
+öffne die Seite einmal in Safari und lade sie neu. Der Browser kann alte Dateien
+kurzzeitig zwischenspeichern.
+
+Die neue Navigation sitzt auf dem iPhone unten am Bildschirm. Auf größeren
+Bildschirmen bleibt sie oben.
