@@ -1,0 +1,23 @@
+# EinkaufsBuddy – Dateien zum Hochladen
+
+## Was enthalten ist
+- `index.html`: komplette App
+- `manifest.webmanifest`: Installationsdaten
+- `sw.js`: Offline-Grundfunktion
+- `icon.svg`: Einkaufswagen-Appsymbol
+
+## So ersetzt du die bisherige Website auf GitHub
+1. Öffne https://github.com/jonasb456-cmd/einkaufsbuddy
+2. Öffne den Reiter **Code**.
+3. Öffne die vorhandene Datei `index.html`.
+4. Tippe auf den Stift **Edit this file**.
+5. Ersetze den gesamten Inhalt durch den Inhalt aus der neuen `index.html`.
+6. Scrolle nach unten und tippe **Commit changes**.
+7. Lade danach die drei übrigen Dateien (`manifest.webmanifest`, `sw.js`, `icon.svg`) einzeln über **Add file → Upload files** hoch und bestätige jeweils mit **Commit changes**.
+8. Warte 1–3 Minuten und öffne https://jonasb456-cmd.github.io/einkaufsbuddy/
+
+## iPhone installieren
+Öffne die Website in Safari → Teilen → **Zum Home-Bildschirm** → Hinzufügen.
+
+## Hinweise
+Die App speichert Daten zunächst lokal in dem Browser/Gerät. Familienmitglieder können Daten über Export/Import austauschen; automatische Live-Synchronisierung ist nicht enthalten. Der KochBuddy liefert lokale, regelbasierte Vorschläge und ist keine angebundene KI. Barcode-Erkennung hängt von Browser und Gerät ab. Das Hochladen der Dateien verändert die bestehende Website erst nach dem GitHub-Commit.
