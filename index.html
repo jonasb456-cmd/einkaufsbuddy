@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#168447">
+<meta name="description" content="EinkaufsBuddy – Einkaufslisten und Rezeptideen">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>EinkaufsBuddy</title>
+<style>
+:root{--green:#168447;--dark:#116638;--orange:#ff9d25;--cream:#fffaf0;--ink:#203329;--muted:#738078;--line:#e7eee8}
+*{box-sizing:border-box}body{margin:0;background:#f4f8f2;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(135deg,#168447,#0d6b39);color:white;padding:24px 18px 20px;border-radius:0 0 26px 26px}
+.brand{font-size:25px;font-weight:850;letter-spacing:-.7px}.brand span{color:#ffd18c}
+header p{margin:5px 0 0;color:#e3f5e9;font-size:14px}
+main{max-width:680px;margin:auto;padding:16px 14px 100px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 16px}
+.tab{border:0;border-radius:14px;background:white;padding:12px 6px;font-weight:700;color:#557064;box-shadow:0 2px 9px #173c1710}
+.tab.active{background:#e2f4e8;color:var(--dark);outline:2px solid #b8e3c5}
+.panel{display:none}.panel.active{display:block}
+.card{background:white;border-radius:18px;padding:16px;margin:0 0 13px;box-shadow:0 4px 18px #173c170b;border:1px solid #edf2ed}
+h2{font-size:19px;margin:0 0 12px}h3{font-size:16px;margin:0 0 5px}
+.small{color:var(--muted);font-size:13px;line-height:1.45}
+.row{display:flex;gap:8px;align-items:center}.row>*{min-width:0}
+input,select{font:inherit;border:1px solid #dce7dd;border-radius:12px;padding:12px;background:#fff;min-width:0}
+input{flex:1;width:100%}button{font:inherit;cursor:pointer}
+.primary{border:0;border-radius:12px;padding:12px 15px;background:var(--green);color:white;font-weight:750}
+.secondary{border:0;border-radius:12px;padding:11px 13px;background:#e8f5eb;color:var(--dark);font-weight:700}
+.danger{border:0;background:#fff0ed;color:#b34b38;border-radius:10px;padding:7px 10px}
+.listitem{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.listitem:last-child{border:0}.listitem input[type=checkbox]{width:21px;height:21px;flex:0 0 21px;accent-color:var(--green)}
+.itemname{flex:1}.done{text-decoration:line-through;color:#9aa69e}
+.pill{font-size:11px;background:#fff2df;color:#985b10;padding:4px 8px;border-radius:99px}
+.recipe{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.recipe button{white-space:nowrap}.tag{font-size:12px;color:#587064}
+.empty{text-align:center;padding:20px;color:var(--muted)}
+footer{position:fixed;bottom:0;left:0;right:0;background:#ffffffed;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));text-align:center;color:var(--muted);font-size:11px}
+@media(min-width:600px){main{padding-top:22px}}
+</style>
+</head>
+<body>
+<header><div class="brand">🛒 Einkaufs<span>Buddy</span></div><p>Dein Einkaufszettel. Deine Rezeptideen. Alles an einem Ort.</p></header>
+<main>
+<nav class="tabs">
+<button class="tab active" data-tab="shopping">🛒 Einkauf</button>
+<button class="tab" data-tab="recipes">🍲 Rezepte</button>
+<button class="tab" data-tab="pantry">🥕 Vorrat</button>
+</nav>
+<section id="shopping" class="panel active">
+<div class="card">
+<h2>Meine Einkaufsliste</h2>
+<div class="row"><input id="newItem" placeholder="Artikel hinzufügen …"><button class="primary" id="addItem">＋</button></div>
+<div class="small" style="margin-top:9px" id="progress">0 Artikel erledigt</div>
+<div id="items"></div>
+<div class="row" style="margin-top:12px"><button class="secondary" id="share">Liste teilen</button><button class="secondary" id="clearDone">Erledigte löschen</button></div>
+</div>
+<div class="card"><h3>💡 Tipp</h3><div class="small">Füge Zutaten aus dem Rezeptbereich hinzu oder schreibe deine Einkäufe direkt oben hinein. Deine Liste bleibt auf diesem Gerät gespeichert.</div></div>
+</section>
+<section id="recipes" class="panel">
+<div class="card">
+<h2>Was möchtest du kochen?</h2>
+<p class="small">Diese erste Version enthält Beispielrezepte. Später ergänzen wir die Online-Rezeptsuche und das Einlesen von Rezeptlinks.</p>
+<div id="recipeList"></div>
+</div>
+<div class="card">
+<h3>🔗 Rezeptlink vorbereiten</h3>
+<div class="small" style="margin-bottom:9px">In der nächsten Ausbaustufe kannst du hier einen Link einfügen und die Zutaten automatisch übernehmen lassen.</div>
+<input id="recipeUrl" placeholder="https://… (für später)">
+</div>
+</section>
+<section id="pantry" class="panel">
+<div class="card">
+<h2>Was hast du zu Hause?</h2>
+<div class="row"><input id="pantryInput" placeholder="z. B. Kartoffeln"><button class="primary" id="addPantry">＋</button></div>
+<div id="pantryItems" style="margin-top:10px"></div>
+</div>
+<div class="card">
+<h3>✨ Ideen aus deinem Vorrat</h3>
+<div class="small" id="suggestions">Trage ein paar Zutaten ein – ich suche passende Beispielgerichte.</div>
+<div id="suggestionList"></div>
+</div>
+</section>
+</main>
+<footer>EinkaufsBuddy · Erste Testversion · Daten bleiben lokal auf diesem Gerät</footer>
+<script>
+const $=id=>document.getElementById(id);
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+let items=load('eb_items',[]);
+let pantry=load('eb_pantry',[]);
+const recipes=[
+ {name:'Cremiger Gemüse-Nudelauflauf',time:'30 Min.',ingredients:['Nudeln','Brokkoli','Sahne','geriebener Käse']},
+ {name:'Kartoffel-Gemüse-Pfanne',time:'25 Min.',ingredients:['Kartoffeln','Paprika','Zwiebel','Eier']},
+ {name:'Pilzrahm mit Serviettenknödeln',time:'25 Min.',ingredients:['Champignons','Sahne','Zwiebel','Serviettenknödel']},
+ {name:'Tomaten-Mozzarella-Pasta',time:'20 Min.',ingredients:['Nudeln','Tomaten','Mozzarella','Basilikum']}
+];
+function renderItems(){ $('items').innerHTML=''; let done=items.filter(x=>x.done).length; $('progress').textContent=`${done} von ${items.length} Artikeln erledigt`;
+ if(!items.length){$('items').innerHTML='<div class="empty">Deine Liste ist noch leer. Füge oben deinen ersten Artikel hinzu. 😊</div>';return}
+ items.forEach((x,i)=>{let d=document.createElement('div');d.className='listitem';d.innerHTML=`<input type="checkbox" ${x.done?'checked':''} aria-label="Erledigt"><span class="itemname ${x.done?'done':''}"></span><button class="danger" aria-label="Löschen">×</button>`;d.querySelector('.itemname').textContent=x.name;d.querySelector('input').onchange=e=>{items[i].done=e.target.checked;save('eb_items',items);renderItems()};d.querySelector('button').onclick=()=>{items.splice(i,1);save('eb_items',items);renderItems()};$('items').append(d)})}
+function addItem(name){name=name.trim();if(!name)return;if(!items.some(x=>x.name.toLowerCase()===name.toLowerCase()))items.push({name,done:false});save('eb_items',items);renderItems()}
+$('addItem').onclick=()=>{addItem($('newItem').value);$('newItem').value=''};
+$('newItem').addEventListener('keydown',e=>{if(e.key==='Enter')$('addItem').click()});
+$('clearDone').onclick=()=>{items=items.filter(x=>!x.done);save('eb_items',items);renderItems()};
+$('share').onclick=async()=>{let text='EinkaufsBuddy\\n'+items.map(x=>(x.done?'☑ ':'☐ ')+x.name).join('\\n');if(navigator.share){try{await navigator.share({title:'Einkaufsliste',text})}catch(e){}}else if(navigator.clipboard){await navigator.clipboard.writeText(text);alert('Liste wurde kopiert.')}else alert(text)};
+function renderRecipes(){ $('recipeList').innerHTML='';recipes.forEach(r=>{let c=document.createElement('div');c.className='card recipe';let left=document.createElement('div');let h=document.createElement('h3');h.textContent=r.name;let p=document.createElement('div');p.className='tag';p.textContent=r.time+' · '+r.ingredients.join(', ');left.append(h,p);let b=document.createElement('button');b.className='secondary';b.textContent='Zutaten +';b.onclick=()=>{r.ingredients.forEach(addItem);document.querySelector('[data-tab="shopping"]').click()};c.append(left,b);$('recipeList').append(c)})}
+function renderPantry(){ $('pantryItems').innerHTML='';pantry.forEach((x,i)=>{let b=document.createElement('button');b.className='secondary';b.style.margin='3px';b.textContent=x+' ×';b.onclick=()=>{pantry.splice(i,1);save('eb_pantry',pantry);renderPantry()};$('pantryItems').append(b)});let matches=recipes.map(r=>({...r,have:r.ingredients.filter(a=>pantry.some(p=>p.toLowerCase()===a.toLowerCase())).length})).filter(r=>r.have>0).sort((a,b)=>b.have-a.have);$('suggestionList').innerHTML='';if(!pantry.length){$('suggestions').textContent='Trage ein paar Zutaten ein – ich suche passende Beispielgerichte.';return}$('suggestions').textContent='Passende Ideen anhand deiner eingetragenen Vorräte:';matches.forEach(r=>{let d=document.createElement('div');d.className='listitem';let s=document.createElement('span');s.className='itemname';s.textContent=r.name+' · '+r.have+'/'+r.ingredients.length+' Zutaten vorhanden';let b=document.createElement('button');b.className='secondary';b.textContent='Fehlendes hinzufügen';b.onclick=()=>{r.ingredients.filter(a=>!pantry.some(p=>p.toLowerCase()===a.toLowerCase())).forEach(addItem);document.querySelector('[data-tab="shopping"]').click()};d.append(s,b);$('suggestionList').append(d)})}
+$('addPantry').onclick=()=>{let v=$('pantryInput').value.trim();if(v&&!pantry.some(x=>x.toLowerCase()===v.toLowerCase()))pantry.push(v);$('pantryInput').value='';save('eb_pantry',pantry);renderPantry()};
+$('pantryInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('addPantry').click()});
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.tab).classList.add('active')});
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+renderItems();renderRecipes();renderPantry();
+</script>
+</body></html>
