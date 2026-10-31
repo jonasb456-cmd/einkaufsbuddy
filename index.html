@@ -77,8 +77,6 @@ function render(){renderShopping();renderRecipes();renderPantry();renderWeek();r
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 <!-- EINKAUFSBUDDY-EXTRAS: erweiterte Funktionen -->
-<script>
-(function(){
   const $ = id => document.getElementById(id);
   function addRecipeActions(){
     const list=$('recipeList'); if(!list || typeof state==='undefined') return;
