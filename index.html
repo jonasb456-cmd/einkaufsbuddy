@@ -7,6 +7,7 @@
 <meta name="description" content="EinkaufsBuddy – Einkauf, Rezepte, Vorräte und Wochenplan an einem Ort.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-512.png">
 <title>EinkaufsBuddy</title>
 <style>
 :root{--green:#167447;--green2:#0f5d38;--mint:#e8f5ed;--orange:#f28c28;--orange2:#fff0df;--ink:#1d2b24;--muted:#68776e;--line:#e2e9e4;--paper:#fff;--bg:#f4f8f5;--red:#c94c42;--shadow:0 8px 26px #173d2810}
@@ -42,7 +43,7 @@
 <div class="grid"><div class="card"><h2>🤖 Dein KochBuddy</h2><p class="muted small">Der lokale Küchenhelfer macht Vorschläge anhand deiner Vorräte und Rezepte. Dafür ist kein Konto nötig.</p><div class="field"><label>Was brauchst du?</label><select id="buddyMode"><option value="ideas">Was kann ich kochen?</option><option value="missing">Was fehlt für ein Rezept?</option><option value="use">Was sollte ich bald verbrauchen?</option></select></div><div class="field" style="margin-top:10px"><label>Zusätzlicher Wunsch (optional)</label><input id="buddyWish" placeholder="z. B. schnell, vegetarisch"></div><button class="orange" id="askBuddy" style="margin-top:10px">Vorschläge anzeigen</button><div id="buddyAnswer" style="margin-top:15px"></div></div><div class="card"><h2>💡 Schnelle Ideen</h2><div class="day"><b>Reste-Pfanne</b><span class="small muted">Gemüse, Reis oder Nudeln verwerten.</span></div><div class="day"><b>Ofengericht</b><span class="small muted">Vorräte mit Käse oder Sauce überbacken.</span></div><div class="day"><b>Einfaches Omelett</b><span class="small muted">Eier mit vorhandenem Gemüse kombinieren.</span></div></div></div>
 </section>
 <section id="family" class="panel">
-<div class="card"><h2>👨‍👩‍👧 Familienliste & Datensicherung</h2><p class="muted">Du kannst deine Liste und Daten exportieren und auf einem anderen Gerät wieder importieren. Für eine gemeinsame Live-Synchronisierung benötigen alle Geräte später einen gemeinsamen Online-Speicher.</p><div class="actions"><button class="primary" id="exportData">Daten exportieren</button><button class="soft" id="importData">Daten importieren</button><input id="importFile" type="file" accept="application/json" class="hidden"></div><p class="small muted" id="familyStatus">Deine Daten werden zunächst auf diesem Gerät gespeichert.</p></div>
+<div class="card"><h2>👨‍👩‍👧 Familienliste & Datensicherung</h2><p class="muted">Du kannst deine Liste und Daten exportieren und auf einem anderen Gerät wieder importieren. Für echte Live-Synchronisierung über mehrere Geräte ist zusätzlich ein gemeinsamer Online-Speicher mit Zugangsdaten nötig. Der Import/Export überträgt Daten manuell.</p><div class="actions"><button class="primary" id="exportData">Daten exportieren</button><button class="soft" id="importData">Daten importieren</button><input id="importFile" type="file" accept="application/json" class="hidden"></div><p class="small muted" id="familyStatus">Deine Daten werden zunächst auf diesem Gerät gespeichert.</p></div>
 <div class="card"><h2>📷 Barcode scannen</h2><p class="muted small">Auf unterstützten Browsern kann die Kamera einen Produkt-Barcode erkennen. Der erkannte Code wird in das Produktfeld übernommen; Produktnamen werden nicht automatisch aus einer Datenbank geladen.</p><div class="actions"><button class="orange" id="scanStart">Kamera starten</button><button class="soft" id="scanStop">Stoppen</button></div><video id="video" playsinline style="width:100%;max-width:420px;border-radius:12px;margin-top:12px;background:#17251d" class="hidden"></video><p id="scanResult" class="small muted"></p></div>
 <div class="card"><h2>📲 App installieren</h2><p class="muted small">Wenn du die Seite über GitHub Pages mit HTTPS öffnest, kannst du sie auf unterstützten Geräten zum Home-Bildschirm hinzufügen. Auf dem iPhone: Safari → Teilen → „Zum Home-Bildschirm“.</p></div>
 </section>
@@ -75,4 +76,63 @@ let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preve
 function render(){renderShopping();renderRecipes();renderPantry();renderWeek();renderBudget()}render();
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
+<!-- EINKAUFSBUDDY-EXTRAS: erweiterte Funktionen -->
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  function addRecipeActions(){
+    const list=$('recipeList'); if(!list || typeof state==='undefined') return;
+    Array.from(list.children).forEach((card,index)=>{
+      const r=state.recipes[index]; if(!r || card.querySelector('.extra-recipe-actions')) return;
+      const area=document.createElement('div'); area.className='actions extra-recipe-actions'; area.style.marginTop='7px';
+      const edit=document.createElement('button'); edit.className='soft'; edit.textContent='Bearbeiten';
+      edit.onclick=function(){
+        $('recipeName').value=r.name||''; $('recipeServings').value=r.servings||1; $('recipeTime').value=r.time||0;
+        $('recipeIngredients').value=(r.ingredients||[]).map(i=>[i.qty,i.unit,i.name].join(';')).join('\n');
+        $('recipeSteps').value=r.steps||''; $('recipeUrl').value=r.url||''; window.__editingRecipeId=r.id;
+        document.querySelector('[data-tab="recipes"]').click(); $('recipeName').focus();
+      };
+      const cook=document.createElement('button'); cook.className='orange'; cook.textContent='Gekocht – Vorräte abziehen';
+      cook.onclick=function(){
+        const used=[];
+        (r.ingredients||[]).forEach(i=>{const p=state.pantry.find(x=>String(x.name).toLowerCase()===String(i.name).toLowerCase()&&x.unit===i.unit);
+          if(p&&Number(p.qty)>=Number(i.qty)){p.qty=Number((Number(p.qty)-Number(i.qty)).toFixed(3));used.push(i.name);if(p.qty<=0)state.pantry=state.pantry.filter(x=>x.id!==p.id);}});
+        save(); alert(used.length?'Abgezogen: '+used.join(', '):'Keine passenden Vorräte in ausreichender Menge gefunden.');
+      };
+      area.append(edit,cook); card.append(area);
+    });
+  }
+  const baseSave=window.save;
+  if(typeof baseSave==='function') window.save=function(){baseSave();addRecipeActions();};
+  const form=$('recipeForm');
+  if(form){const baseSubmit=form.onsubmit;form.onsubmit=function(e){
+    if(!window.__editingRecipeId)return baseSubmit.call(this,e);
+    e.preventDefault(); const id=window.__editingRecipeId; const ix=state.recipes.findIndex(x=>x.id===id);
+    const r={id,name:$('recipeName').value.trim(),servings:Number($('recipeServings').value)||1,time:Number($('recipeTime').value)||0,
+      ingredients:$('recipeIngredients').value.split('\n').map(line=>line.split(';').map(x=>x.trim())).filter(a=>a.length>=3&&a[2]).map(a=>({qty:Number(a[0])||0,unit:a[1],name:a.slice(2).join(';')})),
+      steps:$('recipeSteps').value,url:$('recipeUrl').value};
+    if(ix>=0)state.recipes[ix]=r; window.__editingRecipeId=null; form.reset();$('recipeServings').value=4;$('recipeTime').value=30;save();alert('Rezept wurde aktualisiert.');
+  };}
+  const oldAdd=window.addRecipe;
+  if(typeof oldAdd==='function')window.addRecipe=function(id){
+    const r=state.recipes.find(x=>x.id===id);if(!r)return;
+    const n=prompt('Für wie viele Portionen? (Standard: '+(r.servings||1)+')',String(r.servings||1));if(n===null)return;
+    const servings=Math.max(1,Number(n)||r.servings||1);
+    r.ingredients.forEach(i=>{const qty=Number(i.qty||0)*servings/(Number(r.servings)||1);const old=state.items.find(x=>x.name.toLowerCase()===i.name.toLowerCase()&&x.unit===i.unit&&!x.done);
+      if(old)old.qty+=qty;else state.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name:i.name,qty:qty||1,unit:i.unit,cat:'Sonstiges',done:false});});
+    save();document.querySelector('[data-tab="shopping"]').click();
+  };
+  const barcodeCard=document.querySelector('#family .card:nth-child(2)');
+  if(barcodeCard){const lookup=document.createElement('button');lookup.className='soft';lookup.textContent='Produktname zum Barcode suchen';lookup.style.marginTop='8px';
+    lookup.onclick=async function(){const code=$('itemName').value.trim();if(!/^[0-9]{8,14}$/.test(code)){alert('Bitte zuerst einen Barcode scannen oder die Nummer ins Produktfeld eintragen.');return;}
+      $('scanResult').textContent='Suche Produktdaten …';try{const response=await fetch('https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json');const data=await response.json();const p=data.product;const name=p&&(p.product_name_de||p.product_name||p.generic_name);
+        if(name){$('itemName').value=name;$('scanResult').textContent='Gefunden: '+name+' – jetzt zur Einkaufsliste hinzufügen.';}else $('scanResult').textContent='Kein Produktname in der Datenbank gefunden.';
+      }catch(e){$('scanResult').textContent='Produktdatenbank gerade nicht erreichbar.';}};barcodeCard.append(lookup);}
+  $('notifyBtn').onclick=async function(){if(!('Notification'in window)){alert('Dieser Browser unterstützt keine Benachrichtigungen.');return;}const permission=await Notification.requestPermission();if(permission!=='granted'){alert('Benachrichtigungen nicht freigegeben.');return;}
+    const today=new Date();today.setHours(0,0,0,0);const soon=state.pantry.filter(p=>p.date&&(new Date(p.date+'T00:00:00')-today)/86400000<=2);
+    if(soon.length)new Notification('EinkaufsBuddy – MHD-Erinnerung',{body:soon.slice(0,4).map(p=>p.name).join(', ')});else alert('Erinnerungen sind aktiviert. Beim Öffnen der App prüfen wir deine bald ablaufenden Vorräte.');};
+  addRecipeActions();
+})();
+</script>
+
 </body></html>
