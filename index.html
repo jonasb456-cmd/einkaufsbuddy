@@ -131,6 +131,7 @@ if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.s
     if(soon.length)new Notification('EinkaufsBuddy – MHD-Erinnerung',{body:soon.slice(0,4).map(p=>p.name).join(', ')});else alert('Erinnerungen sind aktiviert. Beim Öffnen der App prüfen wir deine bald ablaufenden Vorräte.');};
   addRecipeActions();
 })();
+<script>      
 // EinkaufsBuddy KI-Chat
 (function () {
   if (document.getElementById("eb-ai-chat")) return;
